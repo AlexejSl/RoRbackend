@@ -13,13 +13,16 @@ class PostsController < ApplicationController
   end
 
   def create
-    @user = User.find_or_create_by(username: post_params[:username])
-    @post = @user.posts.build(post_params)
-
-    if @post.save
-      render json: @post, status: :created
-    else
-      render json: @post.errors, status: :unprocessable_entity
+    ActiveRecord::Base.transaction do
+      @user = User.find_or_create_by(username: post_params[:username])
+      @post = @user.posts.build(post_params)
+  
+      if @post.save
+        render json: @post, status: :created
+      else
+        render json: @post.errors, status: :unprocessable_entity
+        raise ActiveRecord::Rollback
+      end
     end
   end
 
