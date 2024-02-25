@@ -16,6 +16,19 @@ class UsersController < ApplicationController
     end
   end
 
+  def most_posts
+    @users = User.order(posts_count: :desc).limit(3)
+    render json: @users, only: [:username, :posts_count]
+  end
+
+  def most_engaged
+    @users = User.joins(:posts)
+                 .group(:id)
+                 .order('AVG(posts.comments_count) DESC')
+                 .limit(3)
+    render json: @users, only: [:username], methods: :average_comments
+  end
+
   private
 
   def user_params

@@ -27,10 +27,17 @@ class PostsController < ApplicationController
   end
 
   def show
-    @post = Post.find(params[:id])
-    render json: @post
-  rescue ActiveRecord::RecordNotFound
-    render json: { error: 'Post not found' }, status: :not_found
+    if params[:id] == "most_commented"
+      @posts = Post.includes(:comments).order(comments_count: :desc).limit(5)
+    else
+      @post = Post.find(params[:id])
+    end
+  
+    if @posts || @post
+      render json: @posts || @post
+    else
+      render json: { error: 'Post not found' }, status: :not_found
+    end
   end
 
   def destroy
@@ -49,4 +56,6 @@ class PostsController < ApplicationController
   def post_params
     params.require(:post).permit(:username, :title, :text) 
   end
+
+  
 end

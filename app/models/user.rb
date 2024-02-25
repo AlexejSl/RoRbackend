@@ -1,9 +1,12 @@
 class User < ApplicationRecord
-  has_many :posts, ->(user) { where(username: user.username) }, foreign_key: :username, primary_key: :username
+  has_many :posts, foreign_key: :username, primary_key: :username
+  validates_associated :posts
 
-  validates_associated :posts #i dont know if this works to be honest was trying to debug why users are added when post is rolled back, but fixed it in controller
+  def average_comments
+    posts.average(:comments_count).to_f || 0
+  end
 
   def filtered_posts
-    posts
+    posts.where(username: username)
   end
 end
